@@ -1,0 +1,23 @@
+environment: prod
+deployment_status: defined-not-deployed
+container:
+  image_tag: bootstrap
+  cpu: 0.5
+  memory: 1Gi
+  min_replicas: 2
+  max_replicas: 10
+network:
+  address_space: 10.30.0.0/16
+  container_apps_subnet: 10.30.0.0/23
+  database_subnet: 10.30.2.0/28
+database:
+  name: visits
+  version: "16"
+  sku_name: GP_Standard_D2ds_v5
+  storage_mb: 32768
+  backup_retention_days: 35
+  geo_redundant_backup_enabled: true
+  zone: "1"
+  high_availability_mode: ZoneRedundant
+observability:
+  daily_quota_gb: 5

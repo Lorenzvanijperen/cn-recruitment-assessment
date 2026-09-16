@@ -1,0 +1,23 @@
+environment: dev
+deployment_status: deployable
+container:
+  image_tag: bootstrap
+  cpu: 0.25
+  memory: 0.5Gi
+  min_replicas: 0
+  max_replicas: 2
+network:
+  address_space: 10.20.0.0/16
+  container_apps_subnet: 10.20.0.0/23
+  database_subnet: 10.20.2.0/28
+database:
+  name: visits
+  version: "16"
+  sku_name: B_Standard_B1ms
+  storage_mb: 32768
+  backup_retention_days: 7
+  geo_redundant_backup_enabled: false
+  zone: "1"
+  high_availability_mode:
+observability:
+  daily_quota_gb: 1
