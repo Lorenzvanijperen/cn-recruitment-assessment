@@ -1,0 +1,18 @@
+# Terraform working data and local bootstrap state
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+
+# Local backend and variable configuration
+*.tfvars
+*.tfvars.json
+backend.hcl
+
+# Terraform override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
