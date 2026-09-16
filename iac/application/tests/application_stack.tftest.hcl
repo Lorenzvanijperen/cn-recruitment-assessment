@@ -156,18 +156,18 @@ run "defines_the_api_and_manual_migration_job" {
 
   assert {
     condition = (
-      azurerm_container_app.api.revision_mode == "Single" &&
-      azurerm_container_app.api.ingress[0].external_enabled == true &&
-      azurerm_container_app.api.template[0].min_replicas == {
+      azurerm_container_app.api[0].revision_mode == "Single" &&
+      azurerm_container_app.api[0].ingress[0].external_enabled == true &&
+      azurerm_container_app.api[0].template[0].min_replicas == {
         dev  = 0
         prod = 2
       }[terraform.workspace] &&
       startswith(
-        azurerm_container_app.api.template[0].container[0].image,
+        azurerm_container_app.api[0].template[0].container[0].image,
         "crnovabanktest1234.azurecr.io/",
       ) &&
       contains(
-        [for item in azurerm_container_app.api.template[0].container[0].env : item.name],
+        [for item in azurerm_container_app.api[0].template[0].container[0].env : item.name],
         "DATABASE_URL",
       )
     )
@@ -180,5 +180,24 @@ run "defines_the_api_and_manual_migration_job" {
       azurerm_container_app_job.migrate.template[0].container[0].args[0] == "migrate"
     )
     error_message = "Database migrations must run only through a manually triggered job using the API image."
+  }
+}
+
+run "holds_the_api_until_migrations_complete" {
+  command = plan
+
+  variables {
+    deploy_api  = false
+    name_suffix = "test1234"
+  }
+
+  assert {
+    condition     = length(azurerm_container_app.api) == 0
+    error_message = "The deployment workflow must be able to create the migration job before exposing the API."
+  }
+
+  assert {
+    condition     = azurerm_container_app_job.migrate.template[0].container[0].args[0] == "migrate"
+    error_message = "Holding the API must leave the manual migration job deployable."
   }
 }

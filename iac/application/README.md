@@ -13,15 +13,13 @@ without creating production cost.
 Apply the State, Shared, and Identity Bootstrap roots first. Build and push the
 `visit-counter` image to the shared registry before applying this root.
 
-The applying identity needs access to the remote state containers, deployment
-rights in the environment resource group, and permission to create the
-`AcrPull` assignment on the shared registry. The environment deployment
-principal is deliberately scoped only to its resource group, so the initial
-apply must use the bootstrap operator until the shared-registry grant is moved
-to a separately privileged automation stage. The stack grants the applying
-identity permission to write the generated database URL to the environment Key
-Vault. Container Apps use a user-assigned managed identity to pull from the
-shared registry and read that secret.
+`task bootstrap` grants the deployment environment's deployment principal
+write access to the application state, read access to shared state, deployment
+and secret management rights in its resource group, and narrowly scoped image
+push and role-assignment rights on the shared registry. The operator only
+retrieves that credential from the shared vault at runtime. Container Apps use
+a user-assigned managed identity to pull from the shared registry and read the
+generated database URL from the deployment environment's Key Vault.
 
 ## Initialize and review
 
@@ -47,6 +45,11 @@ terraform -chdir=iac/application apply \
 
 Do not apply the prod workspace until NovaBank approves a production
 deployment.
+
+The canonical root-level `task deploy ENV=dev` workflow first applies with
+`deploy_api=false`, runs the manual migration job to completion, and then
+applies with `deploy_api=true`. This prevents the API from accepting visits
+before its schema is ready.
 
 ## Runtime shape
 

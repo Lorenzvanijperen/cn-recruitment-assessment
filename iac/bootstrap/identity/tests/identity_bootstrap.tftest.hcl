@@ -48,6 +48,7 @@ override_data {
   values = {
     outputs = {
       resource_ids = {
+        container_registry = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-shared/providers/Microsoft.ContainerRegistry/registries/crnovabanktest1234"
         key_vaults = {
           ai_inspection = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-shared/providers/Microsoft.KeyVault/vaults/kv-ai"
           deployment    = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-shared/providers/Microsoft.KeyVault/vaults/kv-deployment"
@@ -86,8 +87,8 @@ run "keeps_role_assignments_environment_scoped" {
     condition = toset([
       for assignment in azurerm_role_assignment.deployment :
       assignment.role_definition_name
-    ]) == toset(["Contributor", "User Access Administrator"])
-    error_message = "The deployment principal must be able to deploy and assign roles in its environment."
+    ]) == toset(["Contributor", "Key Vault Secrets Officer", "User Access Administrator"])
+    error_message = "The deployment principal must be able to deploy, assign roles, and manage application secrets in its deployment environment."
   }
 
   assert {
@@ -110,6 +111,34 @@ run "keeps_role_assignments_environment_scoped" {
       ]
     ))
     error_message = "Principal roles must be scoped to the current environment resource group."
+  }
+}
+
+run "grants_the_deployment_workflow_only_required_shared_access" {
+  command = plan
+
+  variables {
+    name_suffix = "test1234"
+  }
+
+  assert {
+    condition = (
+      azurerm_role_assignment.deployment_registry_push.role_definition_name == "AcrPush" &&
+      azurerm_role_assignment.deployment_registry_roles.role_definition_name == "Role Based Access Control Administrator" &&
+      azurerm_role_assignment.deployment_registry_push.scope == data.terraform_remote_state.shared.outputs.resource_ids.container_registry &&
+      azurerm_role_assignment.deployment_registry_roles.scope == data.terraform_remote_state.shared.outputs.resource_ids.container_registry
+    )
+    error_message = "The deployment principal must push images and grant runtime pull access only on the shared registry."
+  }
+
+  assert {
+    condition = (
+      azurerm_role_assignment.deployment_application_state.role_definition_name == "Storage Blob Data Contributor" &&
+      azurerm_role_assignment.deployment_shared_state.role_definition_name == "Storage Blob Data Reader" &&
+      endswith(azurerm_role_assignment.deployment_application_state.scope, "/containers/application-state") &&
+      endswith(azurerm_role_assignment.deployment_shared_state.scope, "/containers/shared-state")
+    )
+    error_message = "The deployment principal must update application state and read shared state without broader storage access."
   }
 }
 

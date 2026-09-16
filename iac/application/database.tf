@@ -72,12 +72,6 @@ resource "azurerm_user_assigned_identity" "application" {
   tags                = local.resource_tags
 }
 
-resource "azurerm_role_assignment" "operator_key_vault_secrets" {
-  scope                = azurerm_key_vault.application.id
-  role_definition_name = "Key Vault Secrets Officer"
-  principal_id         = data.azurerm_client_config.current.object_id
-}
-
 resource "azurerm_role_assignment" "runtime_key_vault_secrets" {
   scope                            = azurerm_key_vault.application.id
   role_definition_name             = "Key Vault Secrets User"
@@ -90,7 +84,6 @@ resource "time_sleep" "role_assignments" {
   create_duration = "30s"
 
   depends_on = [
-    azurerm_role_assignment.operator_key_vault_secrets,
     azurerm_role_assignment.runtime_key_vault_secrets,
     azurerm_role_assignment.runtime_registry_pull,
   ]

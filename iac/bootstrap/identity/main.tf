@@ -20,6 +20,7 @@ locals {
   alphanumeric_project_name = replace(var.project_name, "/[^a-z0-9]/", "")
   generated_suffix          = substr(md5(data.azurerm_client_config.current.subscription_id), 0, 8)
   name_suffix               = coalesce(var.name_suffix, local.generated_suffix)
+  state_storage_account_id  = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/rg-${var.project_name}-tfstate-${local.name_suffix}/providers/Microsoft.Storage/storageAccounts/st${substr(local.alphanumeric_project_name, 0, 8)}tf${local.name_suffix}"
 
   identities = {
     ai_inspection = {
@@ -34,6 +35,7 @@ locals {
 
   deployment_roles = toset([
     "Contributor",
+    "Key Vault Secrets Officer",
     "User Access Administrator",
   ])
 
@@ -112,6 +114,38 @@ resource "azurerm_role_assignment" "inspection" {
   skip_service_principal_aad_check = true
 }
 
+resource "azurerm_role_assignment" "deployment_registry_push" {
+  scope                            = data.terraform_remote_state.shared.outputs.resource_ids.container_registry
+  role_definition_name             = "AcrPush"
+  principal_id                     = azuread_service_principal.identity["deployment"].object_id
+  principal_type                   = "ServicePrincipal"
+  skip_service_principal_aad_check = true
+}
+
+resource "azurerm_role_assignment" "deployment_registry_roles" {
+  scope                            = data.terraform_remote_state.shared.outputs.resource_ids.container_registry
+  role_definition_name             = "Role Based Access Control Administrator"
+  principal_id                     = azuread_service_principal.identity["deployment"].object_id
+  principal_type                   = "ServicePrincipal"
+  skip_service_principal_aad_check = true
+}
+
+resource "azurerm_role_assignment" "deployment_application_state" {
+  scope                            = "${local.state_storage_account_id}/blobServices/default/containers/application-state"
+  role_definition_name             = "Storage Blob Data Contributor"
+  principal_id                     = azuread_service_principal.identity["deployment"].object_id
+  principal_type                   = "ServicePrincipal"
+  skip_service_principal_aad_check = true
+}
+
+resource "azurerm_role_assignment" "deployment_shared_state" {
+  scope                            = "${local.state_storage_account_id}/blobServices/default/containers/shared-state"
+  role_definition_name             = "Storage Blob Data Reader"
+  principal_id                     = azuread_service_principal.identity["deployment"].object_id
+  principal_type                   = "ServicePrincipal"
+  skip_service_principal_aad_check = true
+}
+
 resource "azurerm_key_vault_secret" "credentials" {
   for_each = local.identities
 
@@ -121,6 +155,7 @@ resource "azurerm_key_vault_secret" "credentials" {
   value = jsonencode({
     client_id       = azuread_application.identity[each.key].client_id
     client_secret   = azuread_application_password.identity[each.key].value
+    resource_group  = azurerm_resource_group.environment.name
     subscription_id = data.azurerm_client_config.current.subscription_id
     tenant_id       = data.azurerm_client_config.current.tenant_id
   })

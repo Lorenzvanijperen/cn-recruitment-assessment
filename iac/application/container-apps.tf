@@ -7,6 +7,8 @@ resource "azurerm_role_assignment" "runtime_registry_pull" {
 }
 
 resource "azurerm_container_app" "api" {
+  count = var.deploy_api ? 1 : 0
+
   name                         = "ca-${var.project_name}-${local.environment}-${local.name_suffix}"
   resource_group_name          = data.azurerm_resource_group.environment.name
   container_app_environment_id = azurerm_container_app_environment.application.id

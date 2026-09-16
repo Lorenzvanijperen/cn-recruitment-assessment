@@ -31,6 +31,12 @@ variable "image_reference" {
   }
 }
 
+variable "deploy_api" {
+  description = "Whether to deploy the API. Set false while the migration job is being prepared and run."
+  type        = bool
+  default     = true
+}
+
 variable "tags" {
   description = "Tags applied to environment application resources."
   type        = map(string)

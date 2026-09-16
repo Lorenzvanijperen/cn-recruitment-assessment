@@ -12,8 +12,8 @@ output "application" {
   description = "Non-secret API deployment details."
   value = {
     image = local.container_image
-    name  = azurerm_container_app.api.name
-    url   = "https://${azurerm_container_app.api.latest_revision_fqdn}"
+    name  = try(azurerm_container_app.api[0].name, null)
+    url   = try("https://${azurerm_container_app.api[0].latest_revision_fqdn}", null)
   }
 }
 

@@ -90,11 +90,18 @@ endpoints stay enabled for that local workflow. Registry admin credentials are
 disabled.
 
 Each identity workspace creates its environment resource group before assigning
-roles. The deployment principal receives `Contributor` and `User Access
-Administrator` on that resource group, allowing it to deploy resources and
-assign their required roles without subscription-wide access. The AI inspection
+roles. The deployment principal receives `Contributor`, `User Access
+Administrator`, and `Key Vault Secrets Officer` on that resource group,
+allowing it to deploy resources, assign their required roles, and manage the
+application credential without subscription-wide access. The AI inspection
 principal receives only `Reader` and `Log Analytics Reader` on the same scope.
 Neither principal receives access to the shared credential vaults.
+
+The deployment principal additionally receives `AcrPush` and role-assignment
+administration on the shared registry, write access to only the application
+state container, and read access to only the shared state container. This lets
+the runtime workflow push an image, grant its managed identity pull access, and
+apply the application stack without broader subscription or storage access.
 
 Each purpose-specific shared vault stores one JSON credential secret named
 `dev` or `prod`. Terraform outputs omit the credential value. The encrypted
