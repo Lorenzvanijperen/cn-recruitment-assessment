@@ -7,6 +7,6 @@ Terraform is organized into the agreed deployment boundaries:
 - `bootstrap/identity/`
 - `application/`
 
-The state and shared bootstrap roots are implemented and documented in
-[`bootstrap/README.md`](bootstrap/README.md). Later tickets implement the
-identity and application roots.
+The state, shared, and workspace-driven identity bootstrap roots are implemented
+and documented in [`bootstrap/README.md`](bootstrap/README.md). A later ticket
+implements the application root.
