@@ -11,12 +11,10 @@ therefore disclosed but excluded rather than reconstructed.
 | 2026-09-16 | 21:25-21:35 | Implemented, tested, and deployed the dev and prod identity bootstrap in #24, including environment-scoped roles and vault-stored credentials. |
 | 2026-09-16 | 21:36-21:55 | Defined and tested the dev and prod application stacks in #25; resolved missing `Microsoft.App` registration and an invalid Key Vault secret identifier during the first dev apply. |
 | 2026-09-16 | 21:55-22:18 | Implemented the canonical Task workflow for #26, deployed the dev image by digest after a successful migration job, and proved the persistent visit and correlated Log Analytics record. |
-| 2026-09-16 | 22:20-22:30 | Completed the management summary, assumptions, AI evidence, runbook, and submission index in #27. |
+| 2026-09-16 | 22:20-22:28 | Completed the management summary, assumptions, AI evidence, runbook, and submission index in #27. |
 
 The work remained inside the agreed 3.5-hour implementation-and-submission
-limit. To protect the working vertical slice, production deployment, teardown
-execution, Windows support, PostgreSQL managed-identity authentication,
-database diagnostic logs, a separate application test suite, and presentation
-materials were cut. The [demo runbook](../demo/README.md#known-limitations-and-failed-checks)
-records what was observed, failed, or deliberately not run. Presentation
-content remains human-owned.
+limit. Scope was cut to protect the working vertical slice; the
+[demo runbook](../demo/README.md#known-limitations-and-failed-checks) is the
+canonical record of what was observed, failed, omitted, or deliberately not
+run.
