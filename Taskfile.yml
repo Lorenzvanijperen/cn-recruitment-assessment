@@ -1,0 +1,43 @@
+version: "3"
+
+silent: true
+
+tasks:
+  bootstrap:
+    desc: Create the shared foundations and deployment identity
+    env:
+      TARGET_ENV: '{{default "dev" .ENV}}'
+    cmds:
+      - bash ./scripts/workflow.sh bootstrap
+
+  deploy:
+    desc: Build, migrate, and deploy an immutable image
+    requires:
+      vars: [ENV]
+    env:
+      TARGET_ENV: "{{.ENV}}"
+    cmds:
+      - bash ./scripts/workflow.sh deploy
+
+  test:
+    desc: Prove the visit and its correlated completion log
+    requires:
+      vars: [ENV]
+    env:
+      TARGET_ENV: "{{.ENV}}"
+    cmds:
+      - bash ./scripts/workflow.sh test
+
+  destroy:
+    desc: Destroy the deployment environment application stack
+    requires:
+      vars: [ENV]
+    env:
+      TARGET_ENV: "{{.ENV}}"
+    cmds:
+      - bash ./scripts/workflow.sh destroy
+
+  validate:
+    desc: Run local formatting, tests, and compilation checks
+    cmds:
+      - bash ./scripts/workflow.sh validate
