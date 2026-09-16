@@ -81,6 +81,11 @@ run "creates_an_isolated_environment_network" {
     }[terraform.workspace]
     error_message = "PostgreSQL must receive a separate subnet selected by the environment YAML."
   }
+
+  assert {
+    condition     = try(contains(azurerm_subnet.database.service_endpoints, "Microsoft.Storage"), false)
+    error_message = "The PostgreSQL subnet must retain the storage service endpoint added by Azure."
+  }
 }
 
 run "keeps_postgresql_private_and_its_credential_in_key_vault" {

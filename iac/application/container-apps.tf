@@ -26,7 +26,7 @@ resource "azurerm_container_app" "api" {
   secret {
     name                = "database-url"
     identity            = azurerm_user_assigned_identity.application.id
-    key_vault_secret_id = azurerm_key_vault_secret.database_url.resource_versionless_id
+    key_vault_secret_id = azurerm_key_vault_secret.database_url.versionless_id
   }
 
   ingress {
@@ -103,7 +103,7 @@ resource "azurerm_container_app_job" "migrate" {
   secret {
     name                = "database-url"
     identity            = azurerm_user_assigned_identity.application.id
-    key_vault_secret_id = azurerm_key_vault_secret.database_url.resource_versionless_id
+    key_vault_secret_id = azurerm_key_vault_secret.database_url.versionless_id
   }
 
   manual_trigger_config {

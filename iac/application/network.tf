@@ -29,6 +29,7 @@ resource "azurerm_subnet" "database" {
   virtual_network_name            = azurerm_virtual_network.environment.name
   address_prefixes                = [local.environment_config.network.database_subnet]
   default_outbound_access_enabled = false
+  service_endpoints               = ["Microsoft.Storage"]
 
   delegation {
     name = "postgresql"
